@@ -1,0 +1,10 @@
+flask
+textblob
+scikit-learn
+pandas
+numpy
+nltk
+boto3
+joblib
+fastapi
+uvicorn
