@@ -2,6 +2,97 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme vars */
+:root {
+  --bg: #0b1020;
+  --panel: rgba(255,255,255,0.03);
+  --muted: #9aa4b2;
+  --accent1: #7C3AED;
+  --accent2: #06B6D4;
+  --accent3: #22C55E;
+  --text: #e6eef8;
+  --glass-border: rgba(255,255,255,0.06);
+}
+
+:root[data-theme="light"]{
+  --bg: linear-gradient(180deg,#f7f8fc,#f0f4ff);
+  --panel: rgba(10,10,12,0.03);
+  --muted: #445566;
+  --text: #0b1020;
+  --glass-border: rgba(11,16,32,0.06);
+}
+
 body {
-  @apply bg-slate-950 text-slate-50;
+  min-height: 100vh;
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* glass card base */
+.card-glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
+}
+
+/* gradient button */
+.btn-gradient {
+  background-image: linear-gradient(90deg,var(--accent1) 0%, var(--accent2) 50%, var(--accent3) 100%);
+  color: var(--bg);
+  font-weight: 700;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  box-shadow: 0 10px 30px rgba(4,12,30,0.45);
+}
+
+/* neon outline */
+.neon-outline {
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.06), inset 0 1px 0 rgba(255,255,255,0.02);
+  border: 1px solid rgba(124,58,237,0.12);
+}
+
+/* hover lift */
+.hover-lift {
+  transition: transform .18s cubic-bezier(.2,.9,.2,1), box-shadow .18s, opacity .12s;
+}
+.hover-lift:hover { transform: translateY(-6px); box-shadow: 0 18px 50px rgba(3,7,18,0.6); opacity: 1; }
+
+/* shimmer header */
+.header-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+  background-size: 200% 100%;
+  animation: shimmer 4s linear infinite;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* chips */
+.chip {
+  display:inline-block;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight:600;
+}
+
+/* muted */
+.text-muted { color: var(--muted); }
+
+/* gradient text utility */
+.grad-text {
+  background-image: linear-gradient(90deg,var(--accent1),var(--accent2),var(--accent3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* responsive tweaks */
+@media (max-width: 768px) {
+  .sidebar-collapsed { display: none; }
+  .sidebar-expanded { width: 56px !important; }
 }

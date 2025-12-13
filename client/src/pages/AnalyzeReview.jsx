@@ -2,8 +2,9 @@ import { useState } from "react";
 import api from "../utils/api.js";
 import ReviewCard from "../components/ReviewCard.jsx";
 import Loader from "../components/Loader.jsx";
+import toast from "react-hot-toast";
 
-function AnalyzeReview() {
+export default function AnalyzeReview(){
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
@@ -12,59 +13,107 @@ function AnalyzeReview() {
   const [loading, setLoading] = useState(false);
 
   const handleSingleAnalyze = async () => {
-    if (!text.trim()) return;
+    if (!text.trim()) return toast.error("Enter a review!");
     setLoading(true); setResult(null);
     try {
       const res = await api.post("/reviews/analyze", { reviews: [text] });
       setResult(res.data.results[0]);
-    } catch (err) { console.error(err); alert("Failed to analyze review"); }
-    finally { setLoading(false); }
+      toast.success("Review analyzed ✔️");
+    } catch (err) {
+      console.error(err);
+      toast.error("Analyze failed 😭");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileUpload = async () => {
-    if (!file) return;
+    if (!file) return toast.error("Choose a file!");
     const formData = new FormData();
     formData.append("file", file);
     setLoading(true); setUploadInfo(null); setFileSummary(null);
+
     try {
-      const res = await api.post("/uploads/file", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const res = await api.post("/uploads/file", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       setUploadInfo({ s3Key: res.data.s3Key, message: res.data.message });
       setFileSummary(res.data.analysis?.summary ?? null);
-    } catch (err) { console.error(err); alert("File upload or analysis failed"); }
-    finally { setLoading(false); }
+
+      toast.success("File uploaded & analyzed 🎉 Dashboard updated!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed 😭");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Analyze Reviews</h2>
-      <section className="space-y-3">
-        <h3 className="text-sm font-medium text-slate-200">1. Single Review</h3>
-        <textarea className="w-full h-28 rounded-lg bg-slate-900 border border-slate-700 p-3 text-sm" placeholder="Paste a review here..." value={text} onChange={(e)=>setText(e.target.value)} />
-        <button onClick={handleSingleAnalyze} disabled={!text.trim() || loading} className="px-4 py-2 rounded-lg bg-emerald-500 text-slate-950 text-sm font-medium disabled:opacity-50">
-          Analyze Review
-        </button>
-        {loading && <Loader />}
-        {result && <div className="mt-3"><ReviewCard review={result} /></div>}
-      </section>
+      <h2 className="text-2xl font-bold">Analyze Reviews</h2>
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-medium text-slate-200">2. Upload File (CSV / text)</h3>
-        <input type="file" onChange={(e)=>setFile(e.target.files[0])} className="text-xs" />
-        <button onClick={handleFileUpload} disabled={!file || loading} className="px-4 py-2 rounded-lg border border-slate-700 text-sm disabled:opacity-50">
-          Upload to S3
-        </button>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        {/* SINGLE REVIEW */}
+        <div className="card-glass p-4 neon-outline">
+          <h3 className="text-sm font-semibold">1. Single Review</h3>
 
-        {uploadInfo && (<div className="mt-3 space-y-1 text-xs text-slate-300"><p>{uploadInfo.message}</p><p className="text-slate-400">S3 key: <span className="text-emerald-300">{uploadInfo.s3Key}</span></p></div>)}
+          <textarea
+            className="w-full mt-2 p-3 rounded-lg bg-transparent border border-white/6 text-sm"
+            placeholder="Paste a review..."
+            value={text}
+            onChange={e => setText(e.target.value)}
+          />
 
-        {fileSummary && (
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3"><p className="text-slate-400">Total reviews</p><p className="text-lg font-semibold">{fileSummary.total_reviews}</p></div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3"><p className="text-slate-400">Suspicious reviews</p><p className="text-lg font-semibold">{fileSummary.suspicious}</p><p className="text-slate-400 mt-1">Rate: {(fileSummary.suspicious_rate * 100).toFixed(1)}%</p></div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3"><p className="text-slate-400">Average sentiment</p><p className="text-lg font-semibold">{fileSummary.avg_sentiment.toFixed(3)}</p></div>
+          <div className="mt-3 flex items-center gap-3">
+            <button onClick={handleSingleAnalyze} className="btn-gradient px-4 py-2 rounded-full">Analyze</button>
+            <button onClick={() => { setText(""); setResult(null); }} className="px-3 py-2 rounded-full bg-white/5">Clear</button>
           </div>
-        )}
-      </section>
+
+          {loading && <Loader />}
+          {result && <div className="mt-4"><ReviewCard review={result} /></div>}
+        </div>
+
+        {/* FILE UPLOAD */}
+        <div className="card-glass p-4 neon-outline">
+          <h3 className="text-sm font-semibold">2. Upload File</h3>
+          <p className="text-xs text-muted">CSV with review text (text/text_/reviewText)</p>
+
+          <input type="file" className="mt-3" onChange={e => setFile(e.target.files[0])} />
+
+          <div className="mt-3 flex gap-2">
+            <button onClick={handleFileUpload} className="btn-gradient px-4 py-2 rounded-full">Upload & Analyze</button>
+            <button onClick={() => setFile(null)} className="px-3 py-2 rounded-full bg-white/5">Cancel</button>
+          </div>
+
+          {uploadInfo && (
+            <div className="mt-3 text-xs">
+              <div className="text-muted">{uploadInfo.message}</div>
+              <div className="text-amber-300">{uploadInfo.s3Key}</div>
+            </div>
+          )}
+
+          {fileSummary && (
+            <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
+              <div className="p-3 rounded-md bg-white/4 text-center">
+                <div className="text-sm text-muted">Total</div>
+                <div className="text-xl font-bold">{fileSummary.total_reviews}</div>
+              </div>
+              <div className="p-3 rounded-md bg-white/4 text-center">
+                <div className="text-sm text-muted">Suspicious</div>
+                <div className="text-xl font-bold text-rose-300">{fileSummary.suspicious}</div>
+              </div>
+              <div className="p-3 rounded-md bg-white/4 text-center">
+                <div className="text-sm text-muted">Avg Sent</div>
+                <div className="text-xl font-bold">{fileSummary.avg_sentiment.toFixed(2)}</div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
     </div>
   );
 }
-export default AnalyzeReview;

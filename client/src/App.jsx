@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import Home from "./pages/Home.jsx";
@@ -6,8 +6,9 @@ import Dashboard from "./pages/Dashboard.jsx";
 import AnalyzeReview from "./pages/AnalyzeReview.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
-function App(){
+export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
   return (
     <BrowserRouter>
       <Layout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
@@ -21,5 +22,3 @@ function App(){
     </BrowserRouter>
   );
 }
-
-export default App;

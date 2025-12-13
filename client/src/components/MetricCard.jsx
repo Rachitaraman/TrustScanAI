@@ -1,10 +1,13 @@
-function MetricCard({ label, value, sub }) {
+export default function MetricCard({ label, value, sub }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-      <p className="text-xs uppercase text-slate-400">{label}</p>
-      <p className="text-2xl font-semibold mt-1">{value}</p>
-      {sub && <p className="text-xs mt-1 text-slate-400">{sub}</p>}
+    <div className="rounded-2xl card-glass p-4 neon-outline hover-lift">
+      <div className="flex items-center justify-between">
+        <div className="text-xs text-muted">{label}</div>
+        <div className="text-xs px-2 py-1 rounded-md bg-white/3 text-white">{sub ?? "live"}</div>
+      </div>
+      <div className="mt-3 text-3xl font-extrabold grad-text">
+        {value}
+      </div>
     </div>
   );
 }
-export default MetricCard;
